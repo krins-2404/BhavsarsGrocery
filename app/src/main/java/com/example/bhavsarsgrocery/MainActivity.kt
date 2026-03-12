@@ -16,6 +16,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bhavsarsgrocery.ui.theme.BhavsarsGroceryTheme
 
+// IMPORTANT: If CustomerLoginScreen is in another file,
+// you may need to manually import it if Alt+Enter doesn't work:
+// import com.example.bhavsarsgrocery.CustomerLoginScreen
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,17 +30,21 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        // FIX 1: Keep composable blocks separate inside the NavHost
                         NavHost(navController = navController, startDestination = "welcome") {
                             composable("welcome") {
                                 WelcomeScreen(
                                     onCustomerClick = { navController.navigate("login") },
-                                    onAdminClick = { /* navController.navigate("admin_login") */ }
+                                    onAdminClick = { navController.navigate("admin_login") }
                                 )
                             }
                             composable("login") {
-                                // Make sure you have created the CustomerLoginScreen function in LoginScreen.kt
                                 CustomerLoginScreen()
+                            }
+                            composable("admin_login") {
+                                // We will create this screen next!
+                                AdminLoginScreen(onAdminLoginSuccess = {
+                                    navController.navigate("admin_dashboard")
+                                })
                             }
                         }
                     }
@@ -80,7 +88,7 @@ fun WelcomeScreen(onCustomerClick: () -> Unit, onAdminClick: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedButton(
-            onClick = onAdminClick, // FIX 2: Use onAdminClick here, not onCustomerClick
+            onClick = onAdminClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -94,7 +102,6 @@ fun WelcomeScreen(onCustomerClick: () -> Unit, onAdminClick: () -> Unit) {
 @Composable
 fun WelcomePreview() {
     BhavsarsGroceryTheme {
-        // FIX 3: You must provide "empty" actions for the buttons in the Preview
         WelcomeScreen(onCustomerClick = {}, onAdminClick = {})
     }
 }
