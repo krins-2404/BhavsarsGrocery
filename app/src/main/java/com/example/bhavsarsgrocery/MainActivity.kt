@@ -38,7 +38,22 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable("login") {
-                                CustomerLoginScreen()
+                                CustomerLoginScreen(// Now, clicking "Send OTP" goes to the verification screen
+                                    onOtpSent = { phoneNumber ->
+                                        navController.navigate("otp_verify/$phoneNumber")
+                                    }
+                                )
+                            }
+                            composable("otp_verify/{phoneNumber}") { backStackEntry ->
+                                val phone = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                                OtpVerificationScreen(
+                                    phoneNumber = phone,
+                                    onVerificationSuccess = { navController.navigate("categories") }
+                                )
+                            }
+                            composable("categories") {
+                                CategoryScreen(onCategoryClick = { /* logic */})
+
                             }
                             composable("admin_login") {
                                 // We will create this screen next!
