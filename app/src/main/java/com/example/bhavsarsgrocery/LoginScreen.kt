@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 
 @Composable
-fun CustomerLoginScreen() {
+fun CustomerLoginScreen(onOtpSent: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
 
@@ -44,7 +44,11 @@ fun CustomerLoginScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { /* Logic for OTP will go here later */ },
+            onClick = {
+                if (phoneNumber.length >= 10) {
+                    onOtpSent(phoneNumber)
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             Text("Send OTP")
