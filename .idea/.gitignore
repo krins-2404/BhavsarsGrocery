@@ -1,3 +1,8 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+#Remembers which phone or emulator you last used to run the app(deploymentTargetSelector.xml).
+deploymentTargetSelector.xml
+#Stores settings for how the code editor checks for errors (inspections)(Project_Default.xml).
+Project_Default.xml
+
