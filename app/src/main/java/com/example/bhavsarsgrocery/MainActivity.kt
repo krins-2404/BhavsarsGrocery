@@ -6,7 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+// NEW IMPORTS FOR DATA STORAGE
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,10 +18,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bhavsarsgrocery.ui.theme.BhavsarsGroceryTheme
-
-// IMPORTANT: If CustomerLoginScreen is in another file,
-// you may need to manually import it if Alt+Enter doesn't work:
-// import com.example.bhavsarsgrocery.CustomerLoginScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,15 +29,23 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
+
+                        // This list stores products added by Admin while the app is open
+                        val globalProductList = remember { mutableStateListOf<GroceryItem>() }
+
                         NavHost(navController = navController, startDestination = "welcome") {
+
+                            // 1. WELCOME
                             composable("welcome") {
                                 WelcomeScreen(
                                     onCustomerClick = { navController.navigate("login") },
                                     onAdminClick = { navController.navigate("admin_login") }
                                 )
                             }
+
+                            // 2. CUSTOMER LOGIN & OTP
                             composable("login") {
-                                CustomerLoginScreen(// Now, clicking "Send OTP" goes to the verification screen
+                                CustomerLoginScreen(
                                     onOtpSent = { phoneNumber ->
                                         navController.navigate("otp_verify/$phoneNumber")
                                     }
@@ -51,14 +58,41 @@ class MainActivity : ComponentActivity() {
                                     onVerificationSuccess = { navController.navigate("categories") }
                                 )
                             }
-                            composable("categories") {
-                                CategoryScreen(onCategoryClick = { /* logic */})
 
+                            // 3. SHOPPING
+                            composable("categories") {
+                                CategoryScreen(
+                                    onCategoryClick = { name ->
+                                        navController.navigate("product_list/$name")
+                                    }
+                                )
                             }
+                            composable("product_list/{categoryName}") { backStackEntry ->
+                                val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                                // Passing the dynamic list so customer sees what Admin added
+                                CustomerProductListScreen(
+                                    categoryName = categoryName,
+                                    allProducts = globalProductList
+                                )
+                            }
+
+                            // 4. ADMIN FLOW
                             composable("admin_login") {
-                                // We will create this screen next!
-                                AdminLoginScreen(onAdminLoginSuccess = {
-                                    navController.navigate("admin_dashboard")
+                                AdminLoginScreen(
+                                    onAdminLoginSuccess = {
+                                        navController.navigate("admin_dashboard")
+                                    }
+                                )
+                            }
+                            //composable("admin_dashboard") {
+                               // AdminDashboardScreen(
+                                  //  onNavigateToAddProduct = { navController.navigate("admin_add_product") }
+                              //  )
+                            //}
+                            composable("admin_add_product") {
+                                AdminAddProductScreen(onProductAdded = { newItem ->
+                                    globalProductList.add(newItem)
+                                    navController.popBackStack()
                                 })
                             }
                         }
@@ -69,6 +103,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ... WelcomeScreen and WelcomePreview stay exactly as they were ...
 @Composable
 fun WelcomeScreen(onCustomerClick: () -> Unit, onAdminClick: () -> Unit) {
     Column(
