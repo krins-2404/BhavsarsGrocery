@@ -75,7 +75,13 @@ class MainActivity : ComponentActivity() {
                                     allProducts = globalProductList
                                 )
                             }
-
+                            composable("payment/{amount}") { backStackEntry ->
+                                val amount = backStackEntry.arguments?.getString("amount")?.toDouble() ?: 0.0
+                                PaymentScreen(totalAmount = amount) {
+                                    // Here we would send data to Firebase
+                                    navController.navigate("order_success")
+                                }
+                            }
                             // 4. ADMIN FLOW
                             composable("admin_login") {
                                 AdminLoginScreen(
