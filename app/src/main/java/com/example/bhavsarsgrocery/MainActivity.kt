@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-// NEW IMPORTS FOR DATA STORAGE
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateListOf
@@ -30,8 +29,11 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
 
-                        // This list stores products added by Admin while the app is open
+                        // --- SHARED DATA LISTS ---
                         val globalProductList = remember { mutableStateListOf<GroceryItem>() }
+                        val activeOrders = remember { mutableStateListOf<Order>() }
+                        // FIX: Added the history list for wholesalers
+                        val wholesalerHistory = remember { mutableStateListOf<WholesalerTransaction>() }
 
                         NavHost(navController = navController, startDestination = "welcome") {
 
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            // 2. CUSTOMER LOGIN & OTP
+                            // 2. CUSTOMER FLOW
                             composable("login") {
                                 CustomerLoginScreen(
                                     onOtpSent = { phoneNumber ->
@@ -58,8 +60,6 @@ class MainActivity : ComponentActivity() {
                                     onVerificationSuccess = { navController.navigate("categories") }
                                 )
                             }
-
-                            // 3. SHOPPING
                             composable("categories") {
                                 CategoryScreen(
                                     onCategoryClick = { name ->
@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("product_list/{categoryName}") { backStackEntry ->
                                 val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
-                                // Passing the dynamic list so customer sees what Admin added
                                 CustomerProductListScreen(
                                     categoryName = categoryName,
                                     allProducts = globalProductList
@@ -78,23 +77,30 @@ class MainActivity : ComponentActivity() {
                             composable("payment/{amount}") { backStackEntry ->
                                 val amount = backStackEntry.arguments?.getString("amount")?.toDouble() ?: 0.0
                                 PaymentScreen(totalAmount = amount) {
-                                    // Here we would send data to Firebase
                                     navController.navigate("order_success")
                                 }
                             }
-                            // 4. ADMIN FLOW
+
+                            // 3. ADMIN FLOW
                             composable("admin_login") {
-                                AdminLoginScreen(
-                                    onAdminLoginSuccess = {
-                                        navController.navigate("admin_dashboard")
-                                    }
+                                AdminLoginScreen(onAdminLoginSuccess = {
+                                    navController.navigate("admin_dashboard")
+                                })
+                            }
+                            composable("admin_dashboard") {
+                                AdminDashboard(
+                                    onNavigateToAddProduct = { navController.navigate("admin_add_product") },
+                                    onNavigateToOrders = { navController.navigate("admin_orders") },
+                                    onNavigateToWholesaler = { navController.navigate("wholesaler_ledger") }
                                 )
                             }
-                            //composable("admin_dashboard") {
-                               // AdminDashboardScreen(
-                                  //  onNavigateToAddProduct = { navController.navigate("admin_add_product") }
-                              //  )
-                            //}
+                            // FIX: Corrected the syntax here
+                            composable("wholesaler_ledger") {
+                                WholesalerRecordScreen(records = wholesalerHistory)
+                            }
+                            composable("admin_orders") {
+                                OrderApprovalScreen(orders = activeOrders)
+                            }
                             composable("admin_add_product") {
                                 AdminAddProductScreen(onProductAdded = { newItem ->
                                     globalProductList.add(newItem)
@@ -108,6 +114,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 // ... WelcomeScreen and WelcomePreview stay exactly as they were ...
 @Composable
