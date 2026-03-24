@@ -12,50 +12,71 @@ import androidx.compose.ui.unit.dp
 fun AddWholesalerEntryScreen(onEntrySaved: (WholesalerTransaction) -> Unit) {
     var wholesalerName by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var receivedBy by remember { mutableStateOf("") }
-    var itemsDetail by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("20-03-2026") } // You can automate this later
+    var personName by remember { mutableStateOf("") }
+    var details by remember { mutableStateOf("") }
+
+    // NEW: State to track if it's Stock or Payment
+    var isStockArrival by remember { mutableStateOf(true) }
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Text("Record Wholesaler Visit", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(20.dp))
+        Text("Wholesaler Entry", style = MaterialTheme.typography.headlineSmall)
 
-        // Who is the Supplier?
+        // Mode Selector
+        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+            Button(
+                onClick = { isStockArrival = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isStockArrival) MaterialTheme.colorScheme.primary else Color.LightGray
+                )
+            ) { Text("Stock Arrival") }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Button(
+                onClick = { isStockArrival = false },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (!isStockArrival) MaterialTheme.colorScheme.primary else Color.LightGray
+                )
+            ) { Text("Payment Given") }
+        }
+
         OutlinedTextField(
             value = wholesalerName,
             onValueChange = { wholesalerName = it },
-            label = { Text("Wholesaler Name (e.g. Amul, Parle)") },
+            label = { Text("Wholesaler Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // What did they deliver?
-        OutlinedTextField(
-            value = itemsDetail,
-            onValueChange = { itemsDetail = it },
-            label = { Text("Items Delivered (e.g. 10 Bags Sugar)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // How much money was given?
+        // Label changes based on selection
         OutlinedTextField(
             value = amount,
             onValueChange = { amount = it },
-            label = { Text("Amount Paid (₹)") },
+            label = { Text(if (isStockArrival) "Bill Amount (₹)" else "Amount Paid (₹)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Who took the money?
+        if (!isStockArrival) {
+            OutlinedTextField(
+                value = personName,
+                onValueChange = { personName = it },
+                label = { Text("Whom was the money given to?") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
-            value = receivedBy,
-            onValueChange = { receivedBy = it },
-            label = { Text("Money Given To (Person's Name)") },
+            value = details,
+            onValueChange = { details = it },
+            label = { Text(if (isStockArrival) "Items Details (e.g. 50L Milk)" else "Payment Note (e.g. Cash)") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -63,21 +84,22 @@ fun AddWholesalerEntryScreen(onEntrySaved: (WholesalerTransaction) -> Unit) {
 
         Button(
             onClick = {
-                if (wholesalerName.isNotEmpty() && amount.isNotEmpty()) {
-                    val newRecord = WholesalerTransaction(
-                        wholesalerName = wholesalerName,
-                        date = date,
-                        paymentGivenTo = receivedBy,
-                        amountPaid = amount.toDoubleOrNull() ?: 0.0,
-                        orderDetails = itemsDetail,
-                        deliveryStatus = "Received"
-                    )
-                    onEntrySaved(newRecord)
-                }
+                val newRecord = WholesalerTransaction(
+                    wholesalerName = wholesalerName,
+                    date = "20-03-2026",
+                    type = if (isStockArrival) "STOCK" else "PAYMENT",
+                    paymentGivenTo = if (isStockArrival) "N/A" else personName,
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    details = details,
+                    deliveryStatus = if (isStockArrival) "Received" else "Confirmed"
+                )
+                onEntrySaved(newRecord)
             },
             modifier = Modifier.fillMaxWidth().height(55.dp)
         ) {
-            Text("Save to Ledger")
+            Text("Save Record")
         }
     }
 }
+
+

@@ -13,40 +13,54 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun WholesalerRecordScreen(records: List<WholesalerTransaction>) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Wholesaler Transaction History", style = MaterialTheme.typography.headlineMedium)
+        Text("Wholesaler Ledger", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (records.isEmpty()) {
+            Text("No transactions recorded yet.", color = Color.Gray)
+        }
 
         LazyColumn {
             items(records) { record ->
+                val isStock = record.type == "STOCK"
+
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                    colors = CardDefaults.cardColors(
+                        // Light Blue for Stock, Light Green for Payment
+                        containerColor = if (isStock) Color(0xFFE3F2FD) else Color(0xFFE8F5E9)
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = record.wholesalerName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                            Text(text = record.date, style = MaterialTheme.typography.bodySmall)
+                            Text(record.wholesalerName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text(record.date, style = MaterialTheme.typography.labelSmall)
                         }
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Delivery Detail
-                        Text("Order: ${record.orderDetails}", style = MaterialTheme.typography.bodyMedium)
-                        Text("Status: ${record.deliveryStatus}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                        // Type Badge
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text(if (isStock) "📦 STOCK ARRIVAL" else "💸 PAYMENT GIVEN") }
+                        )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Payment Detail
-                        Surface(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = MaterialTheme.shapes.small,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                Text("Payment of ₹${record.amountPaid}", fontWeight = FontWeight.Bold, color = Color(0xFF1B5E20))
-                                Text("Handed to: ${record.paymentGivenTo}", style = MaterialTheme.typography.bodySmall)
-                            }
+                        Text("Details: ${record.details}", style = MaterialTheme.typography.bodyMedium)
+
+                        if (!isStock) {
+                            Text("Received by: ${record.paymentGivenTo}", style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
                         }
+
+                        Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.LightGray)
+
+                        Text(
+                            text = "Amount: ₹${record.amount}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (isStock) Color.Black else Color(0xFF2E7D32),
+                            fontWeight = FontWeight.ExtraBold
+                        )
                     }
                 }
             }

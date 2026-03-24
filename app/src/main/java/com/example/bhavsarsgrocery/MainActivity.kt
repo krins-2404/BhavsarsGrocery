@@ -98,6 +98,13 @@ class MainActivity : ComponentActivity() {
                             composable("wholesaler_ledger") {
                                 WholesalerRecordScreen(records = wholesalerHistory)
                             }
+                            // 2. Route to add a new entry
+                            composable("add_wholesaler_entry") {
+                                AddWholesalerEntryScreen(onEntrySaved = { newRecord ->
+                                    wholesalerHistory.add(newRecord)
+                                    navController.popBackStack() // This takes you back to the list automatically
+                                })
+                            }
                             composable("admin_orders") {
                                 OrderApprovalScreen(orders = activeOrders)
                             }
