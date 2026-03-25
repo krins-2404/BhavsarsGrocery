@@ -1,4 +1,5 @@
 package com.example.bhavsarsgrocery
+import android.location.Location
 
 // 1. Define the Result types OUTSIDE the class so they are easy to find
 sealed class DeliveryResult {
@@ -36,5 +37,20 @@ object DeliveryCalculator {
         }
 
         return DeliveryResult.Success(deliveryCharge)
+    }
+    fun calculateGpsDistance(shopLat: Double, shopLng: Double, customerLat: Double, customerLng: Double): Double {
+        val shopLocation = Location("Shop").apply {
+            latitude = shopLat
+            longitude = shopLng
+        }
+
+        val customerLocation = Location("Customer").apply {
+            latitude = customerLat
+            longitude = customerLng
+        }
+
+        // Returns distance in meters, so we divide by 1000 for Kilometers
+        val distanceInMeters = shopLocation.distanceTo(customerLocation)
+        return (distanceInMeters / 1000).toDouble()
     }
 }

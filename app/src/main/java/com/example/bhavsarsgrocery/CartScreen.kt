@@ -9,6 +9,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CartScreen(orderAmount: Double, userDistance: Double) {
+    // State to hold the customer's typed address
+    var deliveryAddress by remember { mutableStateOf("") }
+
     // Check our village rules using the Calculator
     val deliveryResult = DeliveryCalculator.calculateTotal(
         orderAmount = orderAmount,
@@ -29,8 +32,12 @@ fun CartScreen(orderAmount: Double, userDistance: Double) {
         // Show Delivery Logic
         when (deliveryResult) {
             is DeliveryResult.Success -> {
+                val charge = deliveryResult.charge
+                val totalToPay = orderAmount + charge
+
                 Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Delivery Charge (${userDistance}km):")
+                    Text("Delivery Charge (${"%.1f".format(userDistance)}km):")
+
                     Text(if (deliveryResult.charge == 0.0) "FREE" else "₹${deliveryResult.charge}")
                 }
 
@@ -57,8 +64,27 @@ fun CartScreen(orderAmount: Double, userDistance: Double) {
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f).height(24.dp))
 
+        // --- NEW: MANUAL ADDRESS ENTRY ---
+        Text("Delivery Details", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = deliveryAddress,
+            onValueChange = { deliveryAddress = it },
+            label = { Text("House No. / Landmark / Street") },
+            placeholder = { Text("e.g., Near the big banyan tree") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3
+        )
+        Text(
+            text = "Distance is calculated automatically using your phone's location.",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
         // Place Order Button (only enabled if delivery is valid)
         Button(
             onClick = { /* Navigate to Payment Screen */ },
@@ -67,5 +93,34 @@ fun CartScreen(orderAmount: Double, userDistance: Double) {
         ) {
             Text("Proceed to Payment")
         }
+    }
+}
+@Composable
+fun AddressSelection(onDistanceCalculated: (Double) -> Unit) {
+    var address by remember { mutableStateOf("") }
+    var manualKm by remember { mutableStateOf("") }
+
+    Column {
+        Text("Delivery Address", style = MaterialTheme.typography.titleMedium)
+        OutlinedTextField(
+            value = address,
+            onValueChange = { address = it },
+            label = { Text("Enter Landmark/House Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Or enter approximate distance (KM):", style = MaterialTheme.typography.bodySmall)
+        OutlinedTextField(
+            value = manualKm,
+            onValueChange = {
+                manualKm = it
+                val km = it.toDoubleOrNull() ?: 0.0
+                onDistanceCalculated(km)
+            },
+            label = { Text("KM from Bhavsar's Shop") },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

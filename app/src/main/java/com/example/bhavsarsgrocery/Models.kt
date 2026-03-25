@@ -29,7 +29,5 @@ data class WholesalerTransaction(
     val paymentGivenTo: String, // Can be "N/A" for stock arrival
     val amount: Double,         // Bill amount or Payment amount
     val details: String,        // "10 Bags Sugar" or "Paid via Cash"
-    val amountPaid: Double,
-    val orderDetails: String,
     val deliveryStatus: String
 )

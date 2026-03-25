@@ -89,6 +89,9 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("admin_dashboard") {
                                 AdminDashboard(
+                                    // ✅ Add these two lines so the dashboard can do its math!
+                                    productList = globalProductList,
+                                    orders = activeOrders,
                                     onNavigateToAddProduct = { navController.navigate("admin_add_product") },
                                     onNavigateToOrders = { navController.navigate("admin_orders") },
                                     onNavigateToWholesaler = { navController.navigate("wholesaler_ledger") }
