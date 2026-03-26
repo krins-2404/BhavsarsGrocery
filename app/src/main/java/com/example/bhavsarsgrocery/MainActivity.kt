@@ -74,6 +74,12 @@ class MainActivity : ComponentActivity() {
                                     allProducts = globalProductList
                                 )
                             }
+                            composable("manage_inventory") {
+                                ManageInventoryScreen(
+                                    productList = globalProductList,
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
                             composable("payment/{amount}") { backStackEntry ->
                                 val amount = backStackEntry.arguments?.getString("amount")?.toDouble() ?: 0.0
                                 PaymentScreen(totalAmount = amount) {
