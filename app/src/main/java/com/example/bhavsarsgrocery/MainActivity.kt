@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                         val activeOrders = remember { mutableStateListOf<Order>() }
                         // FIX: Added the history list for wholesalers
                         val wholesalerHistory = remember { mutableStateListOf<WholesalerTransaction>() }
-
+                        val cartItems = remember { mutableStateListOf<GroceryItem>() }
                         NavHost(navController = navController, startDestination = "welcome") {
 
                             // 1. WELCOME
@@ -71,7 +71,13 @@ class MainActivity : ComponentActivity() {
                                 val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
                                 CustomerProductListScreen(
                                     categoryName = categoryName,
-                                    allProducts = globalProductList
+                                    allProducts = globalProductList,
+                                    cartItems = cartItems,
+                                    onViewCart = {
+                                        // Calculate total amount to pass to CartScreen
+                                        val total = cartItems.sumOf { it.price }
+                                        navController.navigate("cart_screen/$total")
+                                    }
                                 )
                             }
                             composable("manage_inventory") {
