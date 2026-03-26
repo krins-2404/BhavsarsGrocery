@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class) // Required for the Dropdown Menu in Material 3
 @Composable
 fun AdminAddProductScreen(onProductAdded: (GroceryItem) -> Unit) {
     var productName by remember { mutableStateOf("") }
@@ -16,6 +17,9 @@ fun AdminAddProductScreen(onProductAdded: (GroceryItem) -> Unit) {
     var productWeight by remember { mutableStateOf("") } // e.g., 1kg or 500g
 
     val categories = listOf("Daily Grocery", "Dairy & Eggs", "Festival Items", "Seasonal Items")
+    // States for the dropdown menu
+    var expanded by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf(categories[0]) } // Defaults to the first one
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Text("Add New Product", style = MaterialTheme.typography.headlineSmall)
@@ -29,6 +33,39 @@ fun AdminAddProductScreen(onProductAdded: (GroceryItem) -> Unit) {
             label = { Text("Product Name (e.g. Basmati Rice)") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        // 2. Category Dropdown
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = selectedCategory,
+                onValueChange = {},
+                readOnly = true, // Forces them to tap the dropdown, not type freely
+                label = { Text("Select Category") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                modifier = Modifier.menuAnchor().fillMaxWidth()
+            )
+
+            // The list that pops out when tapped
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                categories.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = { Text(selectionOption) },
+                        onClick = {
+                            selectedCategory = selectionOption
+                            expanded = false // Close the menu after clicking
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
