@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,6 +24,8 @@ fun CustomerProductListScreen(categoryName: String,
     // 1. Get unique categories from the products the admin added
     val categories = allProducts.map { it.category }.distinct()
     var selectedCategory by remember { mutableStateOf(if (categories.isNotEmpty()) categories[0] else "") }
+    // --- 🔍 NEW: SEARCH STATE ---
+    var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
         floatingActionButton = {
@@ -38,6 +41,16 @@ fun CustomerProductListScreen(categoryName: String,
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
             Text("Bhavsar's Grocery Shop", style = MaterialTheme.typography.headlineMedium)
+            // --- 🔍 SEARCH BAR UI ---
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Search Sugar, Milk, etc...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                shape = MaterialTheme.shapes.medium,
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -51,7 +64,9 @@ fun CustomerProductListScreen(categoryName: String,
                     categories.forEach { category ->
                         Tab(
                             selected = selectedCategory == category,
-                            onClick = { selectedCategory = category },
+                            onClick = { selectedCategory = category
+                                        searchQuery = "" // Reset search when category changes
+                                      },
                             text = { Text(category) }
                         )
                     }
@@ -60,7 +75,10 @@ fun CustomerProductListScreen(categoryName: String,
 
             Spacer(modifier = Modifier.height(16.dp))
             // 3. Filter the products based on the category the user clicked
-            val filteredProducts = allProducts.filter { it.category == categoryName }
+            val filteredProducts = allProducts.filter {
+                it.category == categoryName &&
+                    it.name.contains(searchQuery, ignoreCase = true)
+            }
 
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 Text(
