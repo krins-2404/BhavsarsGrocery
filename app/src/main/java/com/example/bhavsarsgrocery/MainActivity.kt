@@ -74,12 +74,28 @@ class MainActivity : ComponentActivity() {
                                     allProducts = globalProductList,
                                     cartItems = cartItems,
                                     onViewCart = {
-                                        // Calculate total amount to pass to CartScreen
-                                        val total = cartItems.sumOf { it.price }
-                                        navController.navigate("cart_screen/$total")
+                                        // Now, we go to the Cart Item List instead of jumping straight to delivery!
+                                        navController.navigate("cart_item_list")
                                     }
                                 )
                             }
+                            // 2. NEW: Customer is reviewing their cart (+/- quantities)
+                            composable("cart_item_list") {
+                                CartItemListScreen(
+                                    cartItems = cartItems,
+                                    onBack = { navController.popBackStack() },
+                                    onProceedToDelivery = { totalAmount ->
+                                        navController.navigate("delivery_details/$totalAmount")
+                                    }
+                                )
+                            }
+                            // 3. Customer enters address (This is your old `cart_screen` that we built earlier)
+                            composable("delivery_details/{totalAmount}") { backStackEntry ->
+                                val total = backStackEntry.arguments?.getString("totalAmount")?.toDouble() ?: 0.0
+                                // *Assuming you have a userDistance variable or state here*
+                                CartScreen(orderAmount = total, userDistance = 2.5) // Pass real distance if you have it
+                            }
+
                             composable("manage_inventory") {
                                 ManageInventoryScreen(
                                     productList = globalProductList,
