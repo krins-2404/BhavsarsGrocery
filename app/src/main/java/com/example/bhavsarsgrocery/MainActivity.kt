@@ -79,6 +79,17 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                            // Add this inside your NavHost block
+                            composable("order_success") {
+                                OrderSuccessScreen(
+                                    onBackToHome = {
+                                        // Navigate back to categories and CLEAR the history so they can't go "back" to payment
+                                        navController.navigate("categories") {
+                                            popUpTo("categories") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
                             // 2. NEW: Customer is reviewing their cart (+/- quantities)
                             composable("cart_item_list") {
                                 CartItemListScreen(
